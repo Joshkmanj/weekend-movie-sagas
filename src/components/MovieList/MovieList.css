@@ -1,4 +1,17 @@
 .movies {
-    display : flex;
-    flex-wrap: wrap;
+    display : grid;
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 2%;
+    column-gap: 20px;
+}
+.card {
+    box-shadow: 0px 0px 30px rgb(190, 190, 190);
+    border-radius: 30px;
+    padding: 20px;
+    transition: .3s;
+}
+.card:hover{
+    box-shadow: 0px 0px 30px #796408;
+    color: #8d8048;
+    transition: .3s;
 }

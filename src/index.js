@@ -14,7 +14,8 @@ import axios from 'axios';
 
 // Create the rootSaga generator function----------------------
 function* rootSaga() {
-    yield takeEvery('FETCH_MOVIES', fetchAllMovies);
+    yield takeEvery('FETCH_MOVIES', fetchAllMovies); // This  fetches movie data for the '/home' page gallery
+    yield takeEvery('SELECT_MOVIE', selectMovie); // This gets individual movie data for the '/details' view
 }
 //-------------------------------------------------------------
 
@@ -22,16 +23,21 @@ function* rootSaga() {
 //---------<  S A G A S  >-----------------------------------------------------------------
 function* fetchAllMovies() {
     // get all movies from the DB
-    console.log('fetchAllMovies: getting movies from database (1/2)');
+    // console.log('fetchAllMovies: getting movies from database (1/2)'); // GET route test log
     try {
         const movies = yield axios.get('/api/movie');
-        console.log('fetchAllMovies: response from server (2/2):', movies.data);
+        // console.log('fetchAllMovies: response from server (2/2):', movies.data); // GET route test log
         yield put({ type: 'SET_MOVIES', payload: movies.data });
 
     } catch {
         console.log('fetchAllMovies: Error retrieving movies (2/2)');
     }
 
+}
+function* selectMovie(action) {
+    // try {
+    //     // const selectedMovie = yield axios.get()
+    // }
 }
 
 // Create sagaMiddleware
@@ -59,6 +65,30 @@ const genres = (state = [], action) => {
             return state;
     }
 }
+// Used to store data from currently selected movie, so not all data would need to be retrieved
+// from the database when half of it has already been stored on page load.
+const selectedMovie = (state = {
+    id: '',
+    title: '',
+    poster: '',
+    description: '',
+    genres: [],
+},
+    action) => {
+
+if (action.type === 'SET_SELECTED_MOVIE') {
+    const { id, title, poster, description, genres } = action.payload;
+
+return {...state,
+    id: id,
+    title: title,
+    poster: poster,
+    description: description,
+};
+}
+// If action.type is anything else, it'll just return the last value of state.
+return state;
+}
 // --------------<// E N D   R E D U C E R S  >-------------------------------------------
 
 // --------------<  R E D U X  S T O R E /   >--------------------------
@@ -69,7 +99,9 @@ const storeInstance = createStore(
         genres,
     }),
     // Add sagaMiddleware to our store
-    applyMiddleware(sagaMiddleware, logger),
+    applyMiddleware(sagaMiddleware
+        ,logger // logger tracks changes happening to reducers, it's on it's own line to easily toggle it on/off between tests
+        ),
     );
     
     // Pass rootSaga into our sagaMiddleware
