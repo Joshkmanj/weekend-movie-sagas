@@ -35,9 +35,15 @@ function* fetchAllMovies() {
 
 }
 function* selectMovie(action) {
-    // try {
-    //     // const selectedMovie = yield axios.get()
-    // }
+    const movieDetails = action.payload;
+    console.log('SelectMovie: selecting movie, id is:', movieDetails.id);
+    try {
+        const movieGenres = yield axios.get(`/api/genre/individual/${movieDetails.id}`)
+        yield put({ type: 'SET_SELECTED_MOVIE_DETAILS', payload: movieDetails})
+        yield put({ type: 'SET_SELECTED_MOVIE_GENRES', payload: movieGenres.data })
+    } catch {
+        console.log('selectMovie: Error getting individual movie genre data');
+    }
 }
 
 // Create sagaMiddleware
@@ -65,29 +71,32 @@ const genres = (state = [], action) => {
             return state;
     }
 }
-// Used to store data from currently selected movie, so not all data would need to be retrieved
-// from the database when half of it has already been stored on page load.
+// Used to store data from currently selected movie
 const selectedMovie = (state = {
     id: '',
     title: '',
     poster: '',
     description: '',
     genres: [],
-},
-    action) => {
+}, action) => {
 
-if (action.type === 'SET_SELECTED_MOVIE') {
-    const { id, title, poster, description, genres } = action.payload;
-
-return {...state,
-    id: id,
-    title: title,
-    poster: poster,
-    description: description,
-};
-}
-// If action.type is anything else, it'll just return the last value of state.
-return state;
+    if (action.type === 'SET_SELECTED_MOVIE_DETAILS') {
+        const { id, title, poster, description } = action.payload;
+        return {...state,
+            id: id,
+            title: title,
+            poster: poster,
+            description: description
+        };
+    }
+    if (action.type === 'SET_SELECTED_MOVIE_GENRES') {
+        const genres = action.payload;
+        return {...state,
+            genres: genres,
+        };
+    }
+    // If action.type is anything else, it'll just return the last value of state.
+    return state;
 }
 // --------------<// E N D   R E D U C E R S  >-------------------------------------------
 
@@ -97,15 +106,16 @@ const storeInstance = createStore(
     combineReducers({
         movies,
         genres,
+        selectedMovie,
     }),
     // Add sagaMiddleware to our store
     applyMiddleware(sagaMiddleware
-        ,logger // logger tracks changes happening to reducers, it's on it's own line to easily toggle it on/off between tests
-        ),
-    );
-    
-    // Pass rootSaga into our sagaMiddleware
-    sagaMiddleware.run(rootSaga);
+        , logger // logger tracks changes happening to reducers, it's on it's own line to easily toggle it on/off between tests
+    ),
+);
+
+// Pass rootSaga into our sagaMiddleware
+sagaMiddleware.run(rootSaga);
 
 ReactDOM.render(
     <React.StrictMode>
