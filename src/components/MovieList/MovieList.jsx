@@ -11,6 +11,7 @@ function MovieList() {
         dispatch({ type: 'FETCH_MOVIES' });
     }, []);
 
+    // console.log('FETCH MOVIES has returned:', movies); // test log for GET routes
     return (
         <main>
             <h1>MovieList</h1>
