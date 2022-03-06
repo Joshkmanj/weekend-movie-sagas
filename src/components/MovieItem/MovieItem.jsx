@@ -6,15 +6,15 @@ function MovieItem({movie}){
     const dispatch = useDispatch();
     // const [movieData , setMovieData] = useState(movie)
 
-    function movieClick(movieId){
-        dispatch({ type:'SELECT_MOVIE', payload: movieId}) // Movie id is sent to the saga 'selectMovie'
+    function movieClick(movieObject){
+        dispatch({ type:'SELECT_MOVIE', payload: movieObject}) // Movie id is sent to the saga 'selectMovie'
     }
 
 
     // console.log('MovieItem component recieves this prop:', movie); // Test log to ensure GET request data is making it here.
     return (
         <div className='card'
-        onClick={()=>{movieClick(movie.id)}} // On click, movie data is sent to function above
+        onClick={()=>{movieClick(movie)}} // On click, movie data is sent to function above
         >
             <h3>{movie.title}</h3>
             <img src={movie.poster} alt={movie.title}/>

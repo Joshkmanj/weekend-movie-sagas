@@ -35,11 +35,12 @@ function* fetchAllMovies() {
 
 }
 function* selectMovie(action) {
-    const movieId = action.payload;
-    console.log('SelectMovie: selecting movie, id is:', movieId);
+    const movieDetails = action.payload;
+    console.log('SelectMovie: selecting movie, id is:', movieDetails.id);
     try {
-        const singleMovieData = yield axios.get(`/api/genre/individual/${movieId}`)
-        yield put({ type: 'SET_SELECTED_MOVIE', payload: singleMovieData })
+        const movieGenres = yield axios.get(`/api/genre/individual/${movieDetails.id}`)
+        yield put({ type: 'SET_SELECTED_MOVIE_DETAILS', payload: movieDetails})
+        yield put({ type: 'SET_SELECTED_MOVIE_GENRES', payload: movieGenres.data })
     } catch {
         console.log('selectMovie: Error getting individual movie genre data');
     }
@@ -79,13 +80,18 @@ const selectedMovie = (state = {
     genres: [],
 }, action) => {
 
-    if (action.type === 'SET_SELECTED_MOVIE') {
-        const { id, title, poster, description, genres } = action.payload;
-        return {
+    if (action.type === 'SET_SELECTED_MOVIE_DETAILS') {
+        const { id, title, poster, description } = action.payload;
+        return {...state,
             id: id,
             title: title,
             poster: poster,
-            description: description,
+            description: description
+        };
+    }
+    if (action.type === 'SET_SELECTED_MOVIE_GENRES') {
+        const genres = action.payload;
+        return {...state,
             genres: genres,
         };
     }
