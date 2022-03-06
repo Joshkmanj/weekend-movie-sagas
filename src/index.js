@@ -10,28 +10,43 @@ import logger from 'redux-logger';
 import createSagaMiddleware from 'redux-saga';
 import { takeEvery, put } from 'redux-saga/effects';
 import axios from 'axios';
+//------------<  END IMPORTS  >--------------------------------
 
-// Create the rootSaga generator function
+// Create the rootSaga generator function----------------------
 function* rootSaga() {
-    yield takeEvery('FETCH_MOVIES', fetchAllMovies);
+    yield takeEvery('FETCH_MOVIES', fetchAllMovies); // This  fetches movie data for the '/home' page gallery
+    yield takeEvery('SELECT_MOVIE', selectMovie); // This gets individual movie data for the '/details' view
 }
+//-------------------------------------------------------------
 
+
+//---------<  S A G A S  >-----------------------------------------------------------------
 function* fetchAllMovies() {
     // get all movies from the DB
+    // console.log('fetchAllMovies: getting movies from database (1/2)'); // GET route test log
     try {
         const movies = yield axios.get('/api/movie');
-        console.log('get all:', movies.data);
+        // console.log('fetchAllMovies: response from server (2/2):', movies.data); // GET route test log
         yield put({ type: 'SET_MOVIES', payload: movies.data });
 
     } catch {
-        console.log('get all error');
+        console.log('fetchAllMovies: Error retrieving movies (2/2)');
     }
-        
+
+}
+function* selectMovie(action) {
+    // try {
+    //     // const selectedMovie = yield axios.get()
+    // }
 }
 
 // Create sagaMiddleware
 const sagaMiddleware = createSagaMiddleware();
+//---------<//  E N D   S A G A S  >--------------------------------------------------------
 
+
+
+// --------------<  R E D U C E R S  >------------------------------------------------------
 // Used to store movies returned from the server
 const movies = (state = [], action) => {
     switch (action.type) {
@@ -41,7 +56,6 @@ const movies = (state = [], action) => {
             return state;
     }
 }
-
 // Used to store the movie genres
 const genres = (state = [], action) => {
     switch (action.type) {
@@ -51,7 +65,33 @@ const genres = (state = [], action) => {
             return state;
     }
 }
+// Used to store data from currently selected movie, so not all data would need to be retrieved
+// from the database when half of it has already been stored on page load.
+const selectedMovie = (state = {
+    id: '',
+    title: '',
+    poster: '',
+    description: '',
+    genres: [],
+},
+    action) => {
 
+if (action.type === 'SET_SELECTED_MOVIE') {
+    const { id, title, poster, description, genres } = action.payload;
+
+return {...state,
+    id: id,
+    title: title,
+    poster: poster,
+    description: description,
+};
+}
+// If action.type is anything else, it'll just return the last value of state.
+return state;
+}
+// --------------<// E N D   R E D U C E R S  >-------------------------------------------
+
+// --------------<  R E D U X  S T O R E /   >--------------------------
 // Create one store that all components can use
 const storeInstance = createStore(
     combineReducers({
@@ -59,16 +99,18 @@ const storeInstance = createStore(
         genres,
     }),
     // Add sagaMiddleware to our store
-    applyMiddleware(sagaMiddleware, logger),
-);
-
-// Pass rootSaga into our sagaMiddleware
-sagaMiddleware.run(rootSaga);
+    applyMiddleware(sagaMiddleware
+        ,logger // logger tracks changes happening to reducers, it's on it's own line to easily toggle it on/off between tests
+        ),
+    );
+    
+    // Pass rootSaga into our sagaMiddleware
+    sagaMiddleware.run(rootSaga);
 
 ReactDOM.render(
     <React.StrictMode>
         <Provider store={storeInstance}>
-        <App />
+            <App />
         </Provider>
     </React.StrictMode>,
     document.getElementById('root')
