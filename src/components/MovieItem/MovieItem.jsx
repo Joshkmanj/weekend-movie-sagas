@@ -1,13 +1,17 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 
 function MovieItem({movie}){
 
+    const history = useHistory()
     const dispatch = useDispatch();
     // const [movieData , setMovieData] = useState(movie)
 
     function movieClick(movieObject){
         dispatch({ type:'SELECT_MOVIE', payload: movieObject}) // Movie id is sent to the saga 'selectMovie'
+        history.push('/details') // On click of the movie, this brings the user to the next page
     }
 
 

@@ -38,6 +38,7 @@ function* selectMovie(action) {
     const movieDetails = action.payload;
     console.log('SelectMovie: selecting movie, id is:', movieDetails.id);
     try {
+        // yield put({ type: 'RESET_MOVIE_DETAILS'}) // This is in case there are bugs later on revolving around the movie details not being cleared out properly
         const movieGenres = yield axios.get(`/api/genre/individual/${movieDetails.id}`)
         yield put({ type: 'SET_SELECTED_MOVIE_DETAILS', payload: movieDetails})
         yield put({ type: 'SET_SELECTED_MOVIE_GENRES', payload: movieGenres.data })
@@ -77,7 +78,7 @@ const selectedMovie = (state = {
     title: '',
     poster: '',
     description: '',
-    genres: [],
+    genres: []
 }, action) => {
 
     if (action.type === 'SET_SELECTED_MOVIE_DETAILS') {
@@ -94,6 +95,14 @@ const selectedMovie = (state = {
         return {...state,
             genres: genres,
         };
+    }
+    if (action.type === 'RESET_MOVIE_DETAILS') {
+        return {
+            id: '',
+            title: '',
+            poster: '',
+            description: '',
+            genres: []};
     }
     // If action.type is anything else, it'll just return the last value of state.
     return state;
