@@ -11,6 +11,7 @@ function Details(){
             <img src={movie.poster} alt={movie.title}/>
             <h2>{movie.title}</h2>
             <p>{movie.description}</p>
+            <button>return</button>
         </div>
     )
 }
