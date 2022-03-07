@@ -15,3 +15,6 @@
     color: #8d8048;
     transition: .3s;
 }
+h3{
+    margin-block-end: 1em;
+    margin-block-start: 0em;}
